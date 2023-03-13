@@ -7,6 +7,7 @@ import 'antd/dist/reset.css';
 import { listNotes } from './graphql/queries';
 import { v4 as uuid } from 'uuid';
 import { List, Input, Button } from 'antd';
+import { onCreateNote } from './graphql/subscriptions';
 import {
   updateNote as UpdateNote,
   createNote as CreateNote,
@@ -113,8 +114,19 @@ const App = () => {
     dispatch({ type: 'SET_INPUT', name: e.target.name, value: e.target.value })
   }
 
-  useEffect(() => {
-    fetchNotes();
+  useEffect(() => { //TODO add subscription for delete and mark completed
+    fetchNotes()
+    const subscription = API.graphql({
+      query: onCreateNote
+    })
+      .subscribe({
+        next: noteData => {
+          const note = noteData.value.data.onCreateNote
+          if (CLIENT_ID === note.clientId) return
+          dispatch({ type: 'ADD_NOTE', note })
+        }
+      })
+      return () => subscription.unsubscribe();
   }, []);
 
   const styles = {
