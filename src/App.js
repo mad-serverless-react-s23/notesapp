@@ -110,6 +110,36 @@ const App = () => {
     }
   };
 
+  const numberCompleted = async(note) => {
+    const index = state.notes.findIndex(n => n.id === note.id);
+    const notes = [...state.notes]; 
+    notes[index].completed = !note.completed.length;
+    dispatch({ type: 'SET_NOTES', notes});
+    try {
+      await API.graphql({
+        query: updateNote,
+        variables: {}
+      })
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const listTotal = async(note) => {
+    const index = state.notes.findIndex(n => n.id === note.id);
+    const notes = [...state.notes]; 
+    notes[index] = !note.length;
+    dispatch({ type: 'SET_NOTES', notes});
+    try {
+      await API.graphql({
+        query: updateNote,
+        variables: {}
+      })
+    } catch (err) {
+      console.error(err)
+    }
+  }
+  
   const onChange = (e) => {
     dispatch({ type: 'SET_INPUT', name: e.target.name, value: e.target.value })
   }
@@ -174,6 +204,11 @@ const App = () => {
         onClick={createNote}
         type="primary"
       >Create Note</Button>
+
+      <>
+        <h2 style = {{marginTop:'2em'}}> Completed List Items: !placeholder! & Total List Items: !placeholder! </h2>
+      </>
+      
       <List
         loading={state.loading}
         dataSource={state.notes}
