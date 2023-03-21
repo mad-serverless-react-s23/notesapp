@@ -114,41 +114,6 @@ const App = () => {
     }
   };
 
-  const numberCompleted = async () => {
-    try {
-      const notesData = await API.graphql({
-        query: numberCompleted
-      });
-      dispatch({ type: 'SET_NOTES', notes: [notesData.data.listNotes.items] });
-    } catch (err) {
-      console.log('error: ', err);
-      dispatch({ type: 'ERROR' });
-    }
-  };
-
-  //not working but keeping for reference
-  // const countType = async(note) => {
-  //   const countTypes = this.props.notes.filter(notes => listNotes.items === note);
-  //   return listNotes.items.length;
-  // }
-
-  const listTotal = async (note) => {
-    const index = state.notes.findIndex((n) => n.id === note.id);
-    const notes = [...state.notes];
-    notes[index].completed = !note.length.completed;
-    dispatch({ type: "SET_NOTES", notes });
-    try {
-      await API.graphql({
-        query: listTotal,
-        variables: {
-          input: { id: note.id, completed: notes[index] },
-        },
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const onChange = (e) => {
     dispatch({ type: 'SET_INPUT', name: e.target.name, value: e.target.value })
   }
@@ -216,6 +181,41 @@ const App = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const numberCompleted = async () => {
+    try {
+      const notesData = await API.graphql({
+        query: listNotes
+      });
+      dispatch({ type: 'SET_NOTES', notes: [notesData.data.listNotes.items] });
+    } catch (err) {
+      console.log('error: ', err);
+      dispatch({ type: 'ERROR' });
+    }
+  };
+
+  //not working but keeping for reference
+  // const countType = async(note) => {
+  //   const countTypes = this.props.notes.filter(notes => listNotes.items === note);
+  //   return listNotes.items.length;
+  // }
+
+  const listTotal = async (note) => {
+    const index = state.notes.findIndex((n) => n.id === note.id);
+    const notes = [...state.notes];
+    notes[index].completed = !note.length.completed;
+    dispatch({ type: "SET_NOTES", notes });
+    try {
+      await API.graphql({
+        query: listTotal,
+        variables: {
+          input: { id: note.id, completed: notes[index] },
+        },
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const styles = {
     container: { padding: 20 },
     input: { marginBottom: 10 },
@@ -266,7 +266,7 @@ const App = () => {
       >Create Note</Button>
 
       <Divider orientation="left" orientationMargin="0">
-        Number Completed: {numberCompleted.length} vs. Total: {listTotal.length}
+        Completed: {numberCompleted} vs. Total: {listTotal.length}
       </Divider>
 
       <List
