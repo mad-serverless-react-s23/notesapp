@@ -134,31 +134,31 @@ const App = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // useEffect(() => {
-  //   fetchNotes()
-  //   const subscription = API.graphql({
-  //     query: onDeleteNote
-  //   })
-  //     .subscribe({
-  //       next: noteData => {
-  //         //next line must need different code, but what???
-  //         const note = noteData.value.data.onDeleteNote
-  //         if (CLIENT_ID === note.clientId) return
-  //         // Set_note removes entire list from 2nd window
-  //         //dispatch({ type: 'SET_NOTES', note })
-  //         //Set_Input does nothing
-  //         //dispatch({ type: 'SET_INPUT', note })
-  //         //Reset does nothing
-  //         //dispatch({ type: 'RESET_FORM', note })
-  //         //ADD adds to the 2nd window
-  //         //dispatch({ type: 'ADD_NOTE', note })
-  //         //Do I need a DELETE_Note?
-  //         //Do I need different const for set input?
-  //         //Should I adjust subscription.js?
-  //       }
-  //     })
-  //   return () => subscription.unsubscribe();
-  // }, [])
+  useEffect(() => {
+    fetchNotes()
+    const subscription = API.graphql({
+      query: onDeleteNote
+    })
+      .subscribe({
+        next: noteData => {
+          //next line must need different code, but what???
+          const note = noteData.value.data.onDeleteNote
+          if (CLIENT_ID === note.clientId) return
+          // Set_note removes entire list from 2nd window
+          //dispatch({ type: 'SET_NOTES', note })
+          //Set_Input does nothing
+          //dispatch({ type: 'SET_INPUT', note })
+          //Reset does nothing
+          //dispatch({ type: 'RESET_FORM', note })
+          //ADD adds to the 2nd window
+          //dispatch({ type: 'ADD_NOTE', note })
+          //Do I need a DELETE_Note?
+          //Do I need different const for set input?
+          //Should I adjust subscription.js?
+        }
+      })
+    return () => subscription.unsubscribe();
+  }, [])
 
   useEffect(() => { 
     fetchNotes()
