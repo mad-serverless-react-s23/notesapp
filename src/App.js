@@ -6,11 +6,11 @@ import 'antd/dist/reset.css';
 // found assist at https://stackoverflow.com/questions/65199198/src-index-js-module-not-found-cant-resolve-antd-dist-antd-css
 import { listNotes } from './graphql/queries';
 import { v4 as uuid } from 'uuid';
-import { List, Input, Button, Divider } from 'antd';
-import { 
-  onCreateNote, 
-  onDeleteNote, 
-  onUpdateNote 
+import { List, Input, Button } from 'antd';
+import {
+  onCreateNote,
+  onDeleteNote,
+  onUpdateNote
 } from './graphql/subscriptions';
 import {
   updateNote as UpdateNote,
@@ -33,6 +33,12 @@ const reducer = (state, action) => {
       return { ...state, notes: action.notes, loading: false };
     case 'ADD_NOTE':
       return { ...state, notes: [action.note, ...state.notes] };
+    case 'REMOVE_NOTE':
+      const index = state.notes.findIndex(n => n.id === action.id);
+      const newNotes = [
+        ...state.notes.slice(0, index),
+        ...state.notes.slice(index + 1)];
+      return { ...state, notes: newNotes };
     case 'RESET_FORM':
       return { ...state, form: initialState.form };
     case 'SET_INPUT':
@@ -54,7 +60,7 @@ const App = () => {
       });
       dispatch({ type: 'SET_NOTES', notes: notesData.data.listNotes.items });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       dispatch({ type: 'ERROR' });
     }
   };
@@ -82,11 +88,6 @@ const App = () => {
   };
 
   const deleteNote = async ({ id }) => {
-    const index = state.notes.findIndex(n => n.id === id)
-    const notes = [
-      ...state.notes.slice(0, index), //TODO add filter?.?
-      ...state.notes.slice(index + 1)];
-    dispatch({ type: 'SET_NOTES', notes })
     try {
       await API.graphql({
         query: DeleteNote,
@@ -118,10 +119,9 @@ const App = () => {
     dispatch({ type: 'SET_INPUT', name: e.target.name, value: e.target.value })
   }
 
-  useEffect(() => { 
-    //once subscriptions is figured out, see if it can be combined for less code 
+  useEffect(() => {
     fetchNotes()
-    const subscription = API.graphql({
+    const createSubscription = API.graphql({
       query: onCreateNote
     })
       .subscribe({
@@ -131,59 +131,34 @@ const App = () => {
           dispatch({ type: 'ADD_NOTE', note })
         }
       })
-    return () => subscription.unsubscribe();
-  }, []);
 
-  useEffect(() => {
-    fetchNotes()
-    const subscription = API.graphql({
+    const deleteSubscription = API.graphql({
       query: onDeleteNote
     })
       .subscribe({
         next: noteData => {
-          //next line must need different code, but what???
-          const note = noteData.value.data.onDeleteNote
-          if (CLIENT_ID === note.clientId) return
-          // Set_note removes entire list from 2nd window
-          //dispatch({ type: 'SET_NOTES', note })
-          //Set_Input does nothing
-          //dispatch({ type: 'SET_INPUT', note })
-          //Reset does nothing
-          //dispatch({ type: 'RESET_FORM', note })
-          //ADD adds to the 2nd window
-          //dispatch({ type: 'ADD_NOTE', note })
-          //Do I need a DELETE_Note?
-          //Do I need different const for set input?
-          //Should I adjust subscription.js?
+          const noteId = noteData.value.data.onDeleteNote.id
+          dispatch({ type: 'REMOVE_NOT', id: noteId })
         }
       })
-    return () => subscription.unsubscribe();
-  }, [])
 
-  useEffect(() => { 
-    fetchNotes()
-    const subscription = API.graphql({
-      query: onUpdateNote
-    })
-      .subscribe({
-        next: noteData => {
-          //next line must need different code, but what???
-          const note = noteData.value.data.onUpdateNote
-          if (CLIENT_ID === note.clientId) return
-          //Reset does nothing on 2nd window
-          //dispatch({ type: 'RESET_FORM', note })
-          // Set_note removes entire list from both windows
-          //dispatch({ type: 'SET_NOTES', note })
-          //Set_Input does nothing
-          //dispatch({ type: 'SET_INPUT', note })
-          //ADD adds to the 2nd window
-          //dispatch({ type: 'ADD_NOTE', note })
-        }
-      })
-    return () => subscription.unsubscribe();
+    //!!!!!!!!!!not working yet!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // const updateSubscription = API.graphql({
+    //   query: onUpdateNote
+    // })
+    //   .subscribe({
+    //     next: noteData => {
+    //       const note = noteData.value.data.onUpdateNote
+    //       dispatch({ type: 'SET_INPUT', note })
+    //     }
+    //   })
+
+    return () => {
+      //updateSubscription.unsubscribe();
+      createSubscription.unsubscribe();
+      deleteSubscription.unsubscribe();
+    }
   }, []);
-
-  // const numberCompleted = async () => {
   //   try {
   //     const notesData = await API.graphql({
   //       query: listNotes
@@ -227,7 +202,8 @@ const App = () => {
 
   function renderItem(item) {
     return (
-      <List.Item style={styles.item}
+      <List.Item
+        style={styles.item}
         actions={[
           <p style={styles.p} onClick={() => deleteNote(item)}>delete</p>,
           <p style={styles.p} onClick={() => updateNote(item)}>
@@ -266,11 +242,6 @@ const App = () => {
         onClick={createNote}
         type="primary"
       >Create Note</Button>
-
-      <Divider orientation="left" orientationMargin="0">
-        //had numbercompleted.length - didn't work
-        Completed: {0} vs. Total: {0}
-      </Divider>
 
       <List
         //header={<div> Number Completed: {numberCompleted} vs. Total: {listTotal}</div>} to small
