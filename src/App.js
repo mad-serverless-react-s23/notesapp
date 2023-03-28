@@ -10,7 +10,7 @@ import { List, Input, Button } from 'antd';
 import {
   onCreateNote,
   onDeleteNote,
-  onUpdateNote
+  //onUpdateNote
 } from './graphql/subscriptions';
 import {
   updateNote as UpdateNote,
@@ -138,7 +138,7 @@ const App = () => {
       .subscribe({
         next: noteData => {
           const noteId = noteData.value.data.onDeleteNote.id
-          dispatch({ type: 'REMOVE_NOT', id: noteId })
+          dispatch({ type: 'REMOVE_NOTE', id: noteId })
         }
       })
 
