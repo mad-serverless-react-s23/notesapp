@@ -10,7 +10,7 @@ import { List, Input, Button } from 'antd';
 import {
   onCreateNote,
   onDeleteNote,
-  //onUpdateNote
+  onUpdateNote
 } from './graphql/subscriptions';
 import {
   updateNote as UpdateNote,
@@ -33,12 +33,17 @@ const reducer = (state, action) => {
       return { ...state, notes: action.notes, loading: false };
     case 'ADD_NOTE':
       return { ...state, notes: [action.note, ...state.notes] };
-    case 'REMOVE_NOTE':
+    // case 'REMOVE_NOTE':
+    //   const index = state.notes.findIndex(n => n.id === action.id);
+    //   const newNotes = [
+    //     ...state.notes.slice(0, index),
+    //     ...state.notes.slice(index + 1)];
+    //   return { ...state, notes: newNotes };
+    case 'UPDATE_STATUS':
       const index = state.notes.findIndex(n => n.id === action.id);
-      const newNotes = [
-        ...state.notes.slice(0, index),
-        ...state.notes.slice(index + 1)];
-      return { ...state, notes: newNotes };
+      const notes = [... state.notes]
+      notes[index].completed = !notes.completed
+      return { ...state, notes }
     case 'RESET_FORM':
       return { ...state, form: initialState.form };
     case 'SET_INPUT':
@@ -132,31 +137,31 @@ const App = () => {
         }
       })
 
-    const deleteSubscription = API.graphql({
-      query: onDeleteNote
-    })
-      .subscribe({
-        next: noteData => {
-          const noteId = noteData.value.data.onDeleteNote.id
-          dispatch({ type: 'REMOVE_NOTE', id: noteId })
-        }
-      })
-
-    //!!!!!!!!!!not working yet!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // const updateSubscription = API.graphql({
-    //   query: onUpdateNote
+    // const deleteSubscription = API.graphql({
+    //   query: onDeleteNote
     // })
     //   .subscribe({
     //     next: noteData => {
-    //       const note = noteData.value.data.onUpdateNote
-    //       dispatch({ type: 'SET_INPUT', note })
+    //       const noteId = noteData.value.data.onDeleteNote.id
+    //       dispatch({ type: 'REMOVE_NOTE', id: noteId })
     //     }
     //   })
 
+    //!!!!!!!!!!not working yet!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    const updateSubscription = API.graphql({
+      query: onUpdateNote
+    })
+      .subscribe({
+        next: noteData => {
+          const noteId = noteData.value.data.onUpdateNote.id
+          dispatch({ type: 'UPDATE_STATUS', id: noteId })
+        }
+      })
+
     return () => {
-      //updateSubscription.unsubscribe();
+      updateSubscription.unsubscribe();
       createSubscription.unsubscribe();
-      deleteSubscription.unsubscribe();
+      //deleteSubscription.unsubscribe();
     }
   }, []);
   //   try {
