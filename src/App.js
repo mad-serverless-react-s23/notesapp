@@ -43,6 +43,7 @@ const reducer = (state, action) => {
       const i = state.notes.findIndex(n => n.id === action.id);
       const notes = [... state.notes]
       notes[i].completed = !notes.completed
+      //cannot use { type: 'SET_NOTES', notes } -> TypeError: Cannot read properties of undefined (reading 'name')
       return { ...state, notes }
     case 'RESET_FORM':
       return { ...state, form: initialState.form };
@@ -154,6 +155,7 @@ const App = () => {
       .subscribe({
         next: noteData => {
           const noteId = noteData.value.data.onUpdateNote.id
+          //wondering if there should be an if statement here????????????
           dispatch({ type: 'UPDATE_STATUS', id: noteId })
         }
       })
