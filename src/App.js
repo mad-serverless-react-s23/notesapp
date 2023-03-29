@@ -147,7 +147,7 @@ const App = () => {
     //     }
     //   })
 
-    //!!!!!!!!!!not working yet!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // works to udpate to completed, then it cycles thru two updates when clicked again
     const updateSubscription = API.graphql({
       query: onUpdateNote
     })
