@@ -33,16 +33,16 @@ const reducer = (state, action) => {
       return { ...state, notes: action.notes, loading: false };
     case 'ADD_NOTE':
       return { ...state, notes: [action.note, ...state.notes] };
-    // case 'REMOVE_NOTE':
-    //   const index = state.notes.findIndex(n => n.id === action.id);
-    //   const newNotes = [
-    //     ...state.notes.slice(0, index),
-    //     ...state.notes.slice(index + 1)];
-    //   return { ...state, notes: newNotes };
-    case 'UPDATE_STATUS':
+    case 'REMOVE_NOTE':
       const index = state.notes.findIndex(n => n.id === action.id);
+      const newNotes = [
+        ...state.notes.slice(0, index),
+        ...state.notes.slice(index + 1)];
+      return { ...state, notes: newNotes };
+    case 'UPDATE_STATUS':
+      const i = state.notes.findIndex(n => n.id === action.id);
       const notes = [... state.notes]
-      notes[index].completed = !notes.completed
+      notes[i].completed = !notes.completed
       return { ...state, notes }
     case 'RESET_FORM':
       return { ...state, form: initialState.form };
@@ -137,15 +137,15 @@ const App = () => {
         }
       })
 
-    // const deleteSubscription = API.graphql({
-    //   query: onDeleteNote
-    // })
-    //   .subscribe({
-    //     next: noteData => {
-    //       const noteId = noteData.value.data.onDeleteNote.id
-    //       dispatch({ type: 'REMOVE_NOTE', id: noteId })
-    //     }
-    //   })
+    const deleteSubscription = API.graphql({
+      query: onDeleteNote
+    })
+      .subscribe({
+        next: noteData => {
+          const noteId = noteData.value.data.onDeleteNote.id
+          dispatch({ type: 'REMOVE_NOTE', id: noteId })
+        }
+      })
 
     // works to udpate to completed, then it cycles thru two updates when clicked again
     const updateSubscription = API.graphql({
@@ -161,7 +161,7 @@ const App = () => {
     return () => {
       updateSubscription.unsubscribe();
       createSubscription.unsubscribe();
-      //deleteSubscription.unsubscribe();
+      deleteSubscription.unsubscribe();
     }
   }, []);
   //   try {
