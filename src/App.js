@@ -40,10 +40,23 @@ const reducer = (state, action) => {
         ...state.notes.slice(index + 1)];
       return { ...state, notes: newNotes };
     case 'UPDATE_STATUS':
+      console.log("UPDATE_STATUS running")
       const i = state.notes.findIndex(n => n.id === action.id);
+      //console.log(CLIENT_ID)
+      //console.log(i) -> give place in array and yet still doesn't retunr it keeps going?.? 
       const notes = [... state.notes]
+      //removing line below eliminates subscritpion action, but could be causing 
       notes[i].completed = !notes.completed
+      //const note = notes.value.data.onUpdateNote.id
+      //cycling twice with === not cycling at all with !==
+      //does not matter if return is above or below dispatch
+      //const note = noteData.value.data.onUpdateNote
+      //console.log(CLIENT_ID)
+      //console.log(note.clientId)
+      //makes more sense to put the if statement within update status... I think
+      //if (CLIENT_ID === noteId.id) return 
       //cannot use { type: 'SET_NOTES', notes } -> TypeError: Cannot read properties of undefined (reading 'name')
+      if (CLIENT_ID === i.clientId) return 
       return { ...state, notes }
     case 'RESET_FORM':
       return { ...state, form: initialState.form };
@@ -154,9 +167,20 @@ const App = () => {
     })
       .subscribe({
         next: noteData => {
+          console.log("subscription running")
+          //updateNote runs first and 
           const noteId = noteData.value.data.onUpdateNote.id
-          //wondering if there should be an if statement here????????????
+          //cycling twice with === not cycling at all with !==
+          //does not matter if return is above or below dispatch
+          //const note = noteData.value.data.onUpdateNote
+          //console.log(CLIENT_ID)
+          //console.log(note.clientId)
+          //makes more sense to put the if statement within update status... I think
+          //if (CLIENT_ID === noteId.id) return       
           dispatch({ type: 'UPDATE_STATUS', id: noteId })
+
+          //does not make sense to put in UPDATE_STATUS, although I tried
+          //Does not make sense to put in UpdateNote, although I tried
         }
       })
 
