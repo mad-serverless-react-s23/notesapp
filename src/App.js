@@ -235,9 +235,9 @@ const App = () => {
       >Create Note</Button>
 
       <>
-        <h3 style={{ color: '#2b99ff', textAlign: 'right' }}>
+        <h4 style={{ color: '#2b99ff', textAlign: 'right' }}>
           {completed} completed / {total} total
-        </h3>
+        </h4>
         <hr />
       </>
 
