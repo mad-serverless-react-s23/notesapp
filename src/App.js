@@ -40,23 +40,13 @@ const reducer = (state, action) => {
         ...state.notes.slice(index + 1)];
       return { ...state, notes: newNotes };
     case 'UPDATE_STATUS':
-      console.log("UPDATE_STATUS running")
       const i = state.notes.findIndex(n => n.id === action.id);
-      //console.log(CLIENT_ID)
-      //console.log(i) -> give place in array and yet still doesn't retunr it keeps going?.? 
-      const notes = [... state.notes]
-      //removing line below eliminates subscritpion action, but could be causing 
+      const notes = [...state.notes]
+      if (CLIENT_ID === i.clientId) return;
+      //becuase these two match in the output console there should be a return and it should break the cycle.?.?
+      console.log(CLIENT_ID)
+      console.log(i.clientId)
       notes[i].completed = !notes.completed
-      //const note = notes.value.data.onUpdateNote.id
-      //cycling twice with === not cycling at all with !==
-      //does not matter if return is above or below dispatch
-      //const note = noteData.value.data.onUpdateNote
-      //console.log(CLIENT_ID)
-      //console.log(note.clientId)
-      //makes more sense to put the if statement within update status... I think
-      //if (CLIENT_ID === noteId.id) return 
-      //cannot use { type: 'SET_NOTES', notes } -> TypeError: Cannot read properties of undefined (reading 'name')
-      if (CLIENT_ID === i.clientId) return 
       return { ...state, notes }
     case 'RESET_FORM':
       return { ...state, form: initialState.form };
@@ -190,39 +180,9 @@ const App = () => {
       deleteSubscription.unsubscribe();
     }
   }, []);
-  //   try {
-  //     const notesData = await API.graphql({
-  //       query: listNotes
-  //     });
-  //     dispatch({ type: 'SET_NOTES', notes: [notesData.data.listNotes.items] });
-  //   } catch (err) {
-  //     console.log('error: ', err);
-  //     dispatch({ type: 'ERROR' });
-  //   }
-  // };
 
-  //not working but keeping for reference
-  // const countType = async(note) => {
-  //   const countTypes = this.props.notes.filter(notes => listNotes.items === note);
-  //   return listNotes.items.length;
-  // }
-
-  // const countNotes = async (note) => {
-  //   const index = state.notes.findIndex((n) => n.id === note.id);
-  //   const notes = [...state.notes];
-  //   notes[index].completed = !note.length.completed;
-  //   dispatch({ type: "SET_NOTES", notes });
-  //   try {
-  //     await API.graphql({
-  //       query: countNotes,
-  //       variables: {
-  //         input: { id: note.id, completed: notes[index] },
-  //       },
-  //     });
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
+  const completed = state.notes.filter(n => n.completed).length;
+  const total = state.notes.length;
 
   const styles = {
     container: { padding: 20 },
@@ -273,6 +233,14 @@ const App = () => {
         onClick={createNote}
         type="primary"
       >Create Note</Button>
+
+      <>
+        <h3 style={{ color: '#2b99ff', textAlign: 'right' }}>
+          {completed} completed / {total} total
+        </h3>
+        <hr />
+      </>
+
 
       <List
         //header={<div> Number Completed: {numberCompleted} vs. Total: {listTotal}</div>} to small
